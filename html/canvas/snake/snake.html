@@ -19,16 +19,90 @@
             height: 100vh;
         }
         
-        canvas {
+        canvas,
+        #container {
             background: #999;
+            border: 1px solid #666;
+        }
+        
+        div {
+            width: 300px;
+            height: 300px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+        }
+        
+        body div:nth-child(2) {
+            flex-direction: column;
+        }
+        
+        body div:nth-child(2) h2 {
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .title {
+            height: 50px;
+            width: 100%;
+            line-height: 50px;
+        }
+        
+        .guide h2:first-child p {
+            cursor: pointer;
+        }
+        
+        .guide h2:first-child p:hover {
+            text-decoration: underline;
+            color: blue;
+        }
+        
+        .game-over {
+            position: absolute;
+            display: none;
+        }
+        
+        .content {
+            text-align: center;
+            position: absolute;
+            top: 30px;
+            font-weight: bold;
+            width: auto;
+            height: auto;
+            font-size: 64px;
         }
     </style>
 </head>
 
-<body onload="startGame()">
+<body>
+    <h1 class="game-over">Game Over</h1>
+    <div class="guide">
+        <h2 class="title">
+            <p class="start" onclick="startGame()">Click here to start</p>
+        </h2>
+        <h2 class="title space">Space to pause</h2>
+    </div>
+    <div id="container"></div>
+    <div class="info">
+        <h2 class="title">Score: <span class="score">0</span></h2>
+        <h2 class="title">Speed: <span class="speed">1</span></h2>
+    </div>
+    <div class="content">Hi!</div>
     <script>
         let snake;
         let food;
+        let score = 0;
+        let headX, headY;
+        let speed;
+        let timer;
+        let isPause = false,
+            gameOver = false;
+        let restartContent = 'Restart';
+        let startContent = 'Click here to start';
+        let resumeContent = 'Press space to resume';
+        let pauseContent = 'Press space to pause'
 
         function startGame() {
             myGameArea.start();
@@ -38,11 +112,17 @@
         let myGameArea = {
             canvas: document.createElement('canvas'),
             start: function() {
-                this.canvas.width = 500;
-                this.canvas.height = 500;
+                document.querySelector('.start').innerHTML = restartContent;
+                document.querySelector('.game-over').style.display = 'none';
+                speed = 1;
+                timer = 200;
+                score = 0;
+                this.canvas.width = 300;
+                this.canvas.height = 300;
                 this.context = this.canvas.getContext('2d');
-                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-                this.interval = setInterval(updateGameArea, 300);
+                document.getElementById('container').insertBefore(this.canvas, document.getElementById('container').childNodes[0]);
+                document.getElementById('container').style.border = 'none';
+                this.interval = setInterval(updateGameArea, timer / speed);
             },
             clear: function() {
                 this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -62,13 +142,37 @@
                     ctx.fillStyle = color;
                     ctx.fillRect(this.x, this.y, this.width, this.height);
                 },
-                this.clear = () => {
-                    ctx = myGameArea.context;
-                    ctx.clearRect(this.x, this.y, this.width, this.height)
+                this.updateTail = () => {
+                    for (var i = 0; i < snake.tail.length; i++) {
+                        let x = headX,
+                            y = headY;
+                        headX = snake.tail[i].x;
+                        headY = snake.tail[i].y;
+                        snake.tail[i].draw(x, y);
+                    }
+                },
+                this.death = () => {
+                    for (var i = 0; i < snake.tail.length; i++) {
+                        if (snake.x === snake.tail[i].x && snake.y === snake.tail[i].y) {
+                            gameOver = true;
+                        }
+                    }
                 }
             this.newPos = function() {
+                headX = this.x;
+                headY = this.y;
                 this.x += this.speedX;
                 this.y += this.speedY;
+                if (this.x >= myGameArea.canvas.width) {
+                    this.x = 0;
+                } else if (this.x < 0) {
+                    this.x = myGameArea.canvas.width;
+                }
+                if (this.y >= myGameArea.canvas.height) {
+                    this.y = 0;
+                } else if (this.y < 0) {
+                    this.y = myGameArea.canvas.height;
+                }
             }
         }
 
@@ -85,6 +189,13 @@
             this.updateFood = () => {
                 if (snake.x === this.x && snake.y === this.y) {
                     ctx = myGameArea.context;
+                    document.querySelector('.score').innerHTML = ++score;
+                    if (score > 0 && score % 10 === 0) {
+                        speed += 0.2;
+                        document.querySelector('.speed').innerHTML = speed;
+                        setInterval(updateGameArea, timer / speed);
+                    }
+                    snake.tail.push(new Tail(snake.width, snake.height, "#d63031"))
                     ctx.clearRect(this.x, this.y, this.width, this.height);
                     food = new Food(this.width, this.height, this.color);
                 } else {
@@ -95,35 +206,84 @@
             }
         }
 
+        function Tail(width, height, color) {
+            this.width = width;
+            this.height = height;
+            this.color = color;
+            this.draw = (x, y) => {
+                ctx = myGameArea.context;
+                ctx.fillStyle = this.color;
+                this.x = x;
+                this.y = y;
+                ctx.fillRect(this.x, this.y, this.width, this.height)
+            }
+        }
+
         function updateGameArea() {
-            myGameArea.clear();
-            snake.newPos();
-            food.updateFood();
-            snake.update();
+            if (!isPause && !gameOver) {
+                myGameArea.clear();
+                snake.newPos();
+                food.updateFood();
+                snake.update();
+                snake.updateTail();
+                snake.death();
+            }
+            if (gameOver) {
+                document.querySelector('.game-over').style.display = 'block';
+            } else {
+                document.querySelector('.game-over').style.display = 'none';
+            }
         }
         window.addEventListener('keydown', (e) => {
-            console.log(e.keyCode);
             switch (e.keyCode) {
                 case 37:
-                    snake.speedX = -10;
-                    snake.speedY = 0;
+                    if (!snake.speedX) {
+                        snake.speedX = -10;
+                        snake.speedY = 0;
+                    }
                     break;
                 case 39:
-                    snake.speedX = 10;
-                    snake.speedY = 0;
+                    if (!snake.speedX) {
+                        snake.speedX = 10;
+                        snake.speedY = 0;
+                    }
                     break;
                 case 38:
-                    snake.speedY = -10;
-                    snake.speedX = 0;
-                    break;
+                    if (!snake.speedY) {
+                        snake.speedY = -10;
+                        snake.speedX = 0;
+                        break;
+                    }
                 case 40:
-                    snake.speedY = 10;
-                    snake.speedX = 0;
+                    if (!snake.speedY) {
+                        snake.speedY = 10;
+                        snake.speedX = 0;
+                    }
+                    break;
+                case 32:
+                    isPause = !isPause;
+                    if (isPause) {
+                        document.querySelector('.space').innerHTML = resumeContent;
+                    } else {
+                        document.querySelector('.space').innerHTML = pauseContent;
+                    }
                     break;
                 default:
                     break;
             }
         })
+
+        var stringContent = ['Chào các cậu!', 'Mình là Mạnh nè! &#128582;', 'Welcome to snake game! &#128541; &#128013;'];
+        let index = 0;
+        let content = document.querySelector('.content');
+
+        function showContent() {
+            content.innerHTML = stringContent[index++];
+            if (index === stringContent.length) {
+                clearInterval(sci);
+            }
+        }
+        let sci = setInterval(showContent, 1500);
     </script>
 </body>
 
