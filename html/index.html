@@ -5,13 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
 </head>
 
 <body>
-    <input type="text" />
-    <button>Add</button>
+    <input type="text" class="input" />
+    <button class="add">Add</button>
     <div>List todo</div>
-    <ul>
+    <ul class="todos">
     </ul>
 
     <script>
@@ -21,10 +22,24 @@
             'study',
             'playing'
         ];
+        let list = document.querySelector('.todos');
+        let input = document.querySelector('.input');
+        let addBtn = document.querySelector('.add');
+
+        addBtn.addEventListener('click', addItem);
+
+        function render(listItem) {
+            let res = listTodo.map((item) => {
+                return '<li>' + item + '</>';
+            })
+            list.innerHTML = res.join('');
+        }
 
         function addItem() {
-
+            listTodo.push(input.value);
+            render(listTodo)
         }
+        render(listTodo);
     </script>
 </body>
 

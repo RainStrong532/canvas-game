@@ -17,6 +17,7 @@
             align-items: center;
             flex-direction: column;
             width: 100vw;
+            overflow-x: hidden;
         }
         
         canvas,
@@ -221,6 +222,12 @@
                 snake.speedY = 0;
                 snake.speedX = 10;
                 snake.tail = [];
+                myGameArea.clear();
+                snake.newPos();
+                snake.update();
+                snake.updateTail();
+                snake.death();
+                isUpdate = true;
                 intervalUpdate = setInterval(updateGameArea, time);
                 document.querySelector('.score').innerHTML = score;
                 document.querySelector('.speed').innerHTML = speed;
@@ -308,7 +315,7 @@
                     ctx = myGameArea.context;
                     document.querySelector('.score').innerHTML = ++score;
                     if (score > 0 && score % 10 === 0) {
-                        speed += 0.2;
+                        speed = (speed * 10 + 2) / 10;
                         clearInterval(snake.interval);
                         clearInterval(intervalUpdate);
                         let time = timer / speed;

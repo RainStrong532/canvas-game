@@ -1,0 +1,11 @@
+{
+    "todos": [{
+            "id": 1,
+            "content": "go to school"
+        },
+        {
+            "id": 2,
+            "content": "drink milk tea"
+        }
+    ]
+}
