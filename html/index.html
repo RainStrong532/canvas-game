@@ -16,12 +16,12 @@
     </ul>
 
     <script>
-        let listTodo = [
-            'sleep',
-            'eat',
-            'study',
-            'playing'
-        ];
+        let port = 3001
+        const url = "http://localhost:" + port + "/todos";
+        axios.get(url)
+            .then((res) => {
+                render(res.data);
+            })
         let list = document.querySelector('.todos');
         let input = document.querySelector('.input');
         let addBtn = document.querySelector('.add');
@@ -29,17 +29,20 @@
         addBtn.addEventListener('click', addItem);
 
         function render(listItem) {
-            let res = listTodo.map((item) => {
-                return '<li>' + item + '</>';
+            let res = listItem.map((item) => {
+                return '<li>' + item.content + '</>';
             })
             list.innerHTML = res.join('');
         }
 
         function addItem() {
-            listTodo.push(input.value);
-            render(listTodo)
+            axios.post(url, {
+                    content: input.value
+                })
+                .then((res) => {
+                    console.log(res);
+                });
         }
-        render(listTodo);
     </script>
 </body>
 

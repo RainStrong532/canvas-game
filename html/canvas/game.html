@@ -10,10 +10,22 @@
             margin: 0;
             padding: 0;
         }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        canvas {
+            border: 1px solid #999;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
 <body onload="startGame()">
+    <div class="container"></div>
     <script>
         var myGamePiece;
 
@@ -25,10 +37,10 @@
         var myGameArea = {
             canvas: document.createElement("canvas"),
             start: function() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
+                this.canvas.width = 500;
+                this.canvas.height = 300;
                 this.context = this.canvas.getContext("2d");
-                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                document.querySelector('.container').insertBefore(this.canvas, document.querySelector('.container').childNodes[0]);
                 this.interval = setInterval(updateGameArea, 20);
             },
             clear: function() {
