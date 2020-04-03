@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+    <title>Edit item</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.13.2/firebase-app.js"></script>
@@ -91,60 +91,44 @@
 </head>
 
 <body>
-    <button class="add">Add</button>
-    <div>List todo</div>
-    <ul class="todos">
-    </ul>
+    <input type="text" class="content" />
+    <button class="save">Save</button>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let todoList = [];
             var db = firebase.firestore();
 
+            let input = document.querySelector('.content');
+            let saveBtn = document.querySelector('.save');
+            let hash = location.hash;
+            hash = hash.substring(1, hash.length);
+            hash = parseInt(hash);
+            let content;
+
             db.collection("todos").get().then((querySnapshot) => {
-                todoList = querySnapshot.docs;
-                render(todoList);
+                content = querySnapshot.docs[hash].data().content;
+                input.value = content;
             });
-            let list = document.querySelector('.todos');
-            let addBtn = document.querySelector('.add');
 
-            addBtn.addEventListener('click', addItem);
-            list.addEventListener('click', onListClicked);
+            saveBtn.addEventListener('click', saveItem);
 
-            function onListClicked(e) {
-                var button = e.target;
-                var id = parseInt(button.dataset.id);
-                if (button.innerHTML === 'Delete') {
-                    var content = todoList.find((item, i) => {
-                        return i === id
-                    }).data().content;
-                    var jobskill_query = db.collection('todos').where('content', '==', content);
-                    jobskill_query.get().then(function(querySnapshot) {
+            function saveItem() {
+                db.collection("todos").where("content", "==", content)
+                    .get()
+                    .then(function(querySnapshot) {
                         querySnapshot.forEach(function(doc) {
-                            doc.ref.delete();
-                            db.collection("todos").get().then((querySnapshot) => {
-                                todoList = querySnapshot.docs;
-                                render(todoList);
-                            });
+                            db.collection("todos").doc(doc.id).update({
+                                    content: input.value,
+                                })
+                                .catch((err) => {
+                                    console.log("err: ", err)
+                                })
+                                .then(() => {
+                                    window.location = '/';
+                                })
                         });
-                    });
-                }
-                if (button.innerHTML === 'Edit') {
-                    window.location = "/edit-item.html" + "#" + id;
-                }
-
+                    })
             }
 
-
-            function render(listItem) {
-                let res = listItem.map((item, i) => {
-                    return '<li>' + item.data().content + '<button data-id=' + i + '>Delete</button>' + '<button data-id=' + i + '>Edit</button>' + '</>';
-                })
-                list.innerHTML = res.join('');
-            }
-
-            function addItem() {
-                window.location.pathname = '/new-item.html'
-            }
         });
     </script>
 </body>

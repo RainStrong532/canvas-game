@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+    <title>New Item</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.13.2/firebase-app.js"></script>
@@ -91,59 +91,29 @@
 </head>
 
 <body>
+    <input type="text" class="input" />
     <button class="add">Add</button>
-    <div>List todo</div>
-    <ul class="todos">
-    </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let todoList = [];
             var db = firebase.firestore();
-
-            db.collection("todos").get().then((querySnapshot) => {
-                todoList = querySnapshot.docs;
-                render(todoList);
-            });
-            let list = document.querySelector('.todos');
+            let input = document.querySelector('.input');
             let addBtn = document.querySelector('.add');
 
             addBtn.addEventListener('click', addItem);
-            list.addEventListener('click', onListClicked);
-
-            function onListClicked(e) {
-                var button = e.target;
-                var id = parseInt(button.dataset.id);
-                if (button.innerHTML === 'Delete') {
-                    var content = todoList.find((item, i) => {
-                        return i === id
-                    }).data().content;
-                    var jobskill_query = db.collection('todos').where('content', '==', content);
-                    jobskill_query.get().then(function(querySnapshot) {
-                        querySnapshot.forEach(function(doc) {
-                            doc.ref.delete();
-                            db.collection("todos").get().then((querySnapshot) => {
-                                todoList = querySnapshot.docs;
-                                render(todoList);
-                            });
-                        });
-                    });
-                }
-                if (button.innerHTML === 'Edit') {
-                    window.location = "/edit-item.html" + "#" + id;
-                }
-
-            }
-
-
-            function render(listItem) {
-                let res = listItem.map((item, i) => {
-                    return '<li>' + item.data().content + '<button data-id=' + i + '>Delete</button>' + '<button data-id=' + i + '>Edit</button>' + '</>';
-                })
-                list.innerHTML = res.join('');
-            }
 
             function addItem() {
-                window.location.pathname = '/new-item.html'
+                db.collection("todos").add({
+                        content: input.value,
+                    })
+                    .then(function(docRef) {
+                        console.log("Document written with ID: ", docRef.id);
+                    })
+                    .catch(function(error) {
+                        console.error("Error adding document: ", error);
+                    })
+                    .then(() => {
+                        window.location.pathname = '/';
+                    });
             }
         });
     </script>
