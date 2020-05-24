@@ -1,0 +1,34 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Mạnh",
+      "age": 20
+    },
+    {
+      "id": "2",
+      "name": "Mẽ",
+      "age": 20
+    },
+    {
+      "id": "3",
+      "name": "Là là lá la là",
+      "age": 20
+    },
+    {
+      "id": "4",
+      "name": "dm",
+      "age": "23"
+    },
+    {
+      "name": "HOHO",
+      "age": "23",
+      "id": "qM5Lr0wfl"
+    },
+    {
+      "name": "chuan vcl",
+      "age": "24",
+      "id": "vnhKkFj-6"
+    }
+  ]
+}
